@@ -23,22 +23,23 @@ try {
   $conn = new PDO('mysql:host=hidden.cpd.ufsm.br;dbname=prelude', 'admin2prelude', 'guarana8181'); 
   $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
 
-  if (isset($_POST['varIntervalo'])) {$tempo=$_POST['varIntervalo'];} else {$tempo=1;}
-  
-  $consulta="SELECT count(ad.address), ad.address  FROM prelude.Prelude_CreateTime AS t, prelude.Prelude_Address AS ad WHERE (ad._message_ident = t._message_ident) AND (t.time > date_sub(now(), interval 3 minute)) AND (ad._parent0_index=0) AND (ad._index=0) AND (ad._parent_type="."'"."S"."'".")  GROUP BY ad.address   ORDER BY ad.address;";
+  if (isset($_POST['varIntervalo']))     {$tempo=$_POST['varIntervalo'];} else {$tempo=1;}
+  if (isset($_POST['varGranularidade'])) {$granularidade=$_POST['varGranularidade'];} else {$granularidade=1;}
+    
+  //$consulta="SELECT count(ad.address), ad.address  FROM prelude.Prelude_CreateTime AS t, prelude.Prelude_Address AS ad WHERE (ad._message_ident = t._message_ident) AND (t.time > date_sub(now(), interval 3 minute)) AND (ad._parent0_index=0) AND (ad._index=0) AND (ad._parent_type="."'"."S"."'".")  GROUP BY ad.address   ORDER BY ad.address;";
+  $consulta="SELECT count(ad.address), ad.address  FROM prelude.Prelude_CreateTime AS t, prelude.Prelude_Address AS ad WHERE (ad._message_ident = t._message_ident) AND (t.time > date_sub(now(), interval {$tempo} minute)) AND (ad._parent0_index=0) AND (ad._index=0) AND (ad._parent_type="."'"."S"."'".")  GROUP BY ad.address   ORDER BY ad.address;";
   $data = $conn->query($consulta); 
   
   foreach($data as $row) {
     $y = explode(".",$row[1]);
 
     //print_r($row); 
-    //echo  "["."'".$row[1]."'".", ".$y[3]      ." ,   ".$y[0].",      "."'"."Desntino:."."'".",  ".$row[0]."],";
-    //  echo  "["."'".$row[1]."'".", ".rand(100,0)." ,   ".$y[0].",      "."'"."Desntino:  "."'".",  ".$row[0]."],";
-    echo  "["."'".$row[1]."'".", ".$y[3]." ,    ".$y[2].",      "."'"."Origem: "."'".",  ".$row[0]."],";
-    //echo  "["."'".$row[1]."'".", ".$y[3]." ,    ".$y[0].",      "."'"."Desntino:  "."'".",  ".$row[0]."],";
-    //echo  "["."'".$row[1]."'".", ".$y[3]." ,    ".$y[0].",      "."'"."Origem:    "."'".",  ".$row[0]."],";
-   } 
- //$consulta="SELECT count(ad.address), ad.address  FROM prelude.Prelude_CreateTime AS t, prelude.Prelude_Address AS ad WHERE (ad._message_ident = t._message_ident) AND (t.time > date_sub(now(), interval 3 minute)) AND (ad._parent0_index=0) AND (ad._index=0) AND (ad._parent_type="."'"."T"."'".")  GROUP BY ad.address   ORDER BY ad.address;";
+    
+    if ($row[0] >= $granularidade) {
+		echo  "["."'".$row[1]."'".", ".$y[3]." ,    ".$y[2].",      "."'"."Origem: "."'".",  ".$row[0]."],";    
+	}
+  } 
+ //$consulta="SELECT count(ad.address), ad.address  FROM prelude.Prelude_CreateTime AS t, prelude.Prelude_Address AS ad WHERE (ad._message_ident = t._message_ident) AND (t.time > date_sub(now(), interval 1 minute)) AND (ad._parent0_index=0) AND (ad._index=0) AND (ad._parent_type="."'"."T"."'".")  GROUP BY ad.address   ORDER BY ad.address;";
  $consulta="SELECT count(ad.address), ad.address  FROM prelude.Prelude_CreateTime AS t, prelude.Prelude_Address AS ad WHERE (ad._message_ident = t._message_ident) AND (t.time > date_sub(now(), interval {$tempo} minute)) AND (ad._parent0_index=0) AND (ad._index=0) AND (ad._parent_type="."'"."T"."'".")  GROUP BY ad.address   ORDER BY ad.address;";
  $data = $conn->query($consulta);
  
@@ -46,10 +47,12 @@ try {
     $y = explode(".",$row[1]);
     $seuhash=($y[1]+(2*$y[2])+(7*$y[3])%100);
     $seuhash=$seuhash % 255;
-    echo  "["."'".$row[1]."'".", ".$y[3]." ,    ".$seuhash.",      "."'"."Desntino: "."'".",  ".$row[0]."],";
+    if ($row[0] >= $granularidade) {
+      echo  "["."'".$row[1]."'".", ".$y[3]." ,    ".$seuhash.",      "."'"."Desntino: "."'".",  ".$row[0]."],";
+    }
   } 
-  echo "['IP',100,100,'Outra Classifica',50]";
-  //echo "['sdIP',202,202,'".(string)$tempo."',200]";
+  //echo "['IP',100,100,'Outra Classifica',50]";
+  //echo "['sdIP',202,202,'".(string)$granularidade."',200]";
   
   
 
@@ -87,19 +90,19 @@ try {
 	echo "Intervalo=".$_POST['varIntervalo']."<BR>";
 	echo "Granularidade=".$_POST['varGranularidade']."<BR>";
 	echo "
-	<form action=\"teste.php\" method=\"post\">
+	<form action=\"teste2.php\" method=\"post\">
 		Intervalo:
-	    <select name=\"varIntervalo\">	        
-			<option value=\"\">Selecione</option>
-			<option value=\"3\">3 Minutos</option>
+	    <select name=\"varIntervalo\">	        			
+			<option selected value=\"3\">3 Minutos</option>
 			<option value=\"15\">15 Minutos </option>
+			<option value=\"60\">60 Minutos </option>
 		</select>	
 		<br>
 		Granularidade:
-	    <select name=\"varGranularidade\">	        
-			<option value=\"\">Selecione</option>
-			<option value=\"1\">1 Ataque</option>
+	    <select name=\"varGranularidade\">	        			
+			<option selected value=\"1\">1 Ataque</option>
 			<option value=\"3\">3 Ataques</option>
+			<option value=\"10\">10 Ataques</option>
 		</select>	
     <p><input type=\"submit\" value=\"Me acione\"></p>
     </form>";
