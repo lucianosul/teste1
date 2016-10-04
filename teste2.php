@@ -71,7 +71,7 @@ try {
       ]);
 
       var options = {
-        title: 'Titulo a ser empregado no programa: ' +
+        title: 'Novo Titulo a ser empregado no programa: ' +
                'Linha de baixo da linha de título com ano (2011)',
         hAxis: {title: 'valor aleatório'},
         vAxis: {title: 'outro valor aleatório'},
